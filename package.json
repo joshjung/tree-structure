@@ -8,7 +8,7 @@
 	"url": "https://github.com/joshjung/tree-structure",
 	"email": "joshua.p.jung@gmail.com",
 	"dependencies": {
-		"hasharray": "^0.0.4",
+		"hasharray": "^0.0.5",
 		"debug": "^1.0.4"
 	}
 }

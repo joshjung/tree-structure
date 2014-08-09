@@ -8,7 +8,7 @@ var HashArray = require('hasharray'),
  *    nodeKeyFields: ['keys', 'for', 'hasharray']
  *  }
  */
-var Tree = function(id, options, nodes) {
+var Tree = function(id, options, nodes, callback) {
 	this.id = id;
 
 	this.options = options || {};
@@ -34,13 +34,18 @@ var Tree = function(id, options, nodes) {
 		this._root = value;
 		this.refresh();
 	});
+
+	this.__defineSetter__('callback', function(value) {
+		this._callback = this.nodes.callback = value;
+	});
 };
 
 Tree.prototype = {
 	refresh: function() {
-		this.allNodes = new HashArray(this.options.nodeKeyFields);
+		var that = this;
+		this.nodes = new HashArray(this.options.nodeKeyFields, this._callback);
 		this.root.each(function(child, ix) {
-			this.allNodes.add(child);
+			that.nodes.add(child);
 		});
 	},
 	get: function(key) {
@@ -48,9 +53,9 @@ Tree.prototype = {
 	},
 	flatten: function() {
 		return {
-			id: id,
+			id: this.id,
 			options: this.options,
-			root: root.flatten()
+			root: this.root.flatten()
 		};
 	},
 	unflatten: function(data) {
@@ -59,11 +64,14 @@ Tree.prototype = {
 		this.root = new TreeNode(this);
 		this.root.unflatten(data.root, this);
 	},
-	nodesAddedHandler: function(nodes) {
-		this.nodes.add(nodes);
+	nodesAddedHandler: function(node, nodes) {
+		this.nodes.add.apply(this.nodes, nodes);
 	},
-	nodesRemovedHandler: function(nodes) {
+	nodesRemovedHandler: function(node, nodes) {
 		this.nodes.remove(nodes);
+	},
+	clone: function() {
+		//TODO
 	}
 };
 

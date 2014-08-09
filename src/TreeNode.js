@@ -41,18 +41,18 @@ var TreeNode = function(parent, id, children) {
 		switch (type) {
 			case 'add':
 				// One or more child nodes have been added.
-				this.parent.nodesAddedHandler(that, value);
+				that.parentTree.nodesAddedHandler(that, value);
 				break;
 			case 'remove':
 			case 'removeByKey':
 				// One or more chidl nodes have been removed.
-				this.parent.nodesRemovedHandler(that, value);
+				that.parentTree.nodesRemovedHandler(that, value);
 				break;
 			case 'construct':
 				break;
 			case 'removeAll':
 				// All child nodes have been set to nothing.
-				this.parent.nodesRemovedHandler(value);
+				that.parentTree.nodesRemovedHandler(that);
 				break;
 		}
 	}
@@ -61,9 +61,9 @@ var TreeNode = function(parent, id, children) {
 TreeNode.prototype = {
 	each: function(callback) {
 		this.eachChild(function(child) {
-			callback(child);
 			child.each(callback);
 		});
+		callback(this);
 	},
 	eachChild: function(callback) {
 		var children = this._children.all.concat(),
@@ -79,14 +79,19 @@ TreeNode.prototype = {
 	},
 	flatten: function() {
 		var ret = {
-				id: this.id,
-				data: this.data
-			},
-			c = ret[this.options.childrenField] = [];
+			id: this.id
+		};
 
-		this.each(function(child) {
-			c.push(child.flatten());
-		});
+		if (this._children.all.length) {
+			c = ret[this.options.childrenField] = [];
+			this.eachChild(function(child) {
+				c.push(child.flatten());
+			});
+		}
+
+		if (this.data) {
+			ret.data = data;
+		}
 
 		return ret;
 	},
@@ -95,12 +100,16 @@ TreeNode.prototype = {
 		this.parent = parent;
 		this.clear();
 
-		for (var ix in data[this.options.nodeKeyFields]) {
-			var newChild = this.unflatten(data[this.options.nodeKeyFields][ix], this);
+		var children = data[this.options.childrenField];
+		for (var ix in children) {
+			var newChild = new TreeNode(this);
+			newChild.unflatten(children[ix], this);
 			this._children.add(newChild);
 		}
 
-		this.data = data.data;
+		if (data.data) {
+			this.data = data.data;
+		}
 	}
 };
 
