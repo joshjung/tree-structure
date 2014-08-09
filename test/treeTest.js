@@ -62,7 +62,7 @@ describe('TreeStructure', function() {
 		var tree = new Tree();
 
 		tree.callback = function(type, value) {
-			//			console.log(type, value);
+
 		};
 
 		var flattened = {
