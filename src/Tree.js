@@ -73,15 +73,20 @@ Tree.prototype = {
 		this.root = new TreeNode(this);
 		this.root.unflatten(data.root, this);
 	},
-	toTreeAndNodes: function() {
+	detach: function() {
 		var nodes = [];
 		var tree = {
-			'_id': this.id
+			'id': this.id
 		};
 
-		root.forEach(function(node, ix) {
-			nodes.push(node.toDBNode());
+		this.root.each(function(node, ix) {
+			nodes.push(node.detach());
 		});
+
+		return {
+			tree: tree,
+			nodes: nodes
+		};
 	},
 	nodesAddedHandler: function(node, nodes) {
 		this.nodes.add.apply(this.nodes, nodes);

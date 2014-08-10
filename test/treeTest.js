@@ -155,4 +155,99 @@ describe('TreeStructure', function() {
 			assert.equal(typeof tree.root.id, 'string');
 		});
 	});
+
+	describe('Detaching a node should detach a node so that its only references to the tree are via ids to its children.', function() {
+		var tree = new Tree();
+
+		var flattened = {
+			id: 'some tree',
+			options: {
+				idGenerator: undefined
+			},
+			root: {
+				data: {
+					text: "Some data string."
+				},
+				children: [{
+					id: 1,
+					data: {
+						text: "Some data string."
+					}
+				}]
+			}
+		}
+
+		tree.unflatten(flattened);
+
+		var rootDetached = tree.root.detach();
+		var childDetached = tree.nodes.get(1).detach();
+
+		it('Detached node should have an id.', function() {
+			assert.equal(rootDetached.id, tree.root.id);
+		});
+
+		it('Detached node should have data.', function() {
+			assert.strictEqual(rootDetached.data, tree.root.data);
+		});
+
+		it('Detached node should childIds.', function() {
+			assert.deepEqual(rootDetached.childIds, [1]);
+		});
+
+		it('Detached node without children should not have childIds.', function() {
+			assert.deepEqual(childDetached.childIds, undefined);
+		});
+	});
+
+	describe('Detaching a tree should return a reference to a tree and all nodes completely detached.', function() {
+		var tree = new Tree();
+
+		var flattened = {
+			id: 'some tree',
+			options: {
+				idGenerator: undefined
+			},
+			root: {
+				data: {
+					text: "Some data string."
+				},
+				children: [{
+					id: 1,
+					data: {
+						text: "Some data string."
+					}
+				}, {
+					id: 2,
+					data: {
+						text: "Some data string."
+					}
+				}, {
+					id: 3,
+					data: {
+						text: "Some data string."
+					}
+				}]
+			}
+		}
+
+		tree.unflatten(flattened);
+
+		var treeDetached = tree.detach();
+
+		it('Detached tree should have an id.', function() {
+			assert.equal(treeDetached.tree.id, tree.id);
+		});
+
+		it('Detached tree should have no root.', function() {
+			assert.strictEqual(treeDetached.tree.root, undefined);
+		});
+
+		it('Detached tree should have no children.', function() {
+			assert.strictEqual(treeDetached.tree.nodes, undefined);
+		});
+
+		it('Detached node should nodes.', function() {
+			assert.deepEqual(treeDetached.nodes.length, 4);
+		});
+	});
 });

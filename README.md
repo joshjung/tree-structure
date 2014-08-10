@@ -56,6 +56,9 @@ Construct a basic tree from a Javascript object.
     var root = tree.root; // Return the root node.
     console.log(root == tree.get(1)); // 'true'
 
+License
+=======
+
 The MIT License (MIT)
 
 Copyright (c) 2014 Joshua Jung
