@@ -30,9 +30,9 @@ var TreeNode = function(parent, id, children) {
 		this.data = undefined;
 	};
 
-	this.id = id;
 	this.parent = parent;
 	this.clear();
+	this.id = id ? id : this.parentTree.options.idGenerator(this);
 
 	if (children)
 		this._children.add.apply(this._children, children);
@@ -96,9 +96,9 @@ TreeNode.prototype = {
 		return ret;
 	},
 	unflatten: function(data, parent) {
-		this.id = data.id;
 		this.parent = parent;
 		this.clear();
+		this.id = data.id ? data.id : parent.options.idGenerator();
 
 		var children = data[this.options.childrenField];
 		for (var ix in children) {
@@ -110,6 +110,18 @@ TreeNode.prototype = {
 		if (data.data) {
 			this.data = data.data;
 		}
+	},
+	detach: function() {
+		var ids = [];
+		this.eachChild(function(child) {
+			ids.push(child.id);
+		});
+
+		return {
+			id: this.id,
+			data: this.data,
+			childIds: ids
+		};
 	}
 };
 

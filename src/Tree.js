@@ -1,5 +1,6 @@
 var HashArray = require('hasharray'),
-	TreeNode = require('./TreeNode');
+	TreeNode = require('./TreeNode'),
+	uuid = require('node-uuid');
 
 /**
  * id: id of the tree. Used for debugging or for saving to a db.
@@ -11,20 +12,27 @@ var HashArray = require('hasharray'),
 var Tree = function(id, options, nodes, callback) {
 	this.id = id;
 
-	this.options = options || {};
-	this.options.childrenField = this.options.childrenField || 'children';
+	this.validateOptions = function() {
+		this.options = this.options || {};
+		this.options.childrenField = this.options.childrenField || 'children';
+		this.options.idGenerator = this.options.idGenerator || function(node) {
+			return uuid.v4();
+		};
+		if (options && options.nodeKeyFields) {
+			var kf = options.nodeKeyFields.concat();
+			for (var i = 0; i < kf.length; i++)
+				kf[i] = ['data', kf[i]];
+			kf.push('id');
+			this.options.nodeKeyFields = kf;
+		} else {
+			this.options.nodeKeyFields = ['id'];
+		}
+	}
+
+	this.options = options;
+	this.validateOptions();
 
 	this.nodes = new HashArray(['id']);
-
-	if (options && options.nodeKeyFields) {
-		var kf = options.nodeKeyFields.concat();
-		for (var i = 0; i < kf.length; i++)
-			kf[i] = ['data', kf[i]];
-		kf.push('id');
-		this.options.nodeKeyFields = kf;
-	} else {
-		this.options.nodeKeyFields = ['id'];
-	}
 
 	this.__defineGetter__('root', function() {
 		return this._root;
@@ -61,8 +69,19 @@ Tree.prototype = {
 	unflatten: function(data) {
 		this.id = data.id;
 		this.options = data.options;
+		this.validateOptions();
 		this.root = new TreeNode(this);
 		this.root.unflatten(data.root, this);
+	},
+	toTreeAndNodes: function() {
+		var nodes = [];
+		var tree = {
+			'_id': this.id
+		};
+
+		root.forEach(function(node, ix) {
+			nodes.push(node.toDBNode());
+		});
 	},
 	nodesAddedHandler: function(node, nodes) {
 		this.nodes.add.apply(this.nodes, nodes);

@@ -113,10 +113,6 @@ describe('TreeStructure', function() {
 	describe('new Tree() should flatten an unflattened structure and be the same.', function() {
 		var tree = new Tree();
 
-		tree.callback = function(type, value) {
-			//			console.log(type, value);
-		};
-
 		var flattened = {
 			id: 'some tree',
 			options: {
@@ -139,6 +135,24 @@ describe('TreeStructure', function() {
 
 		it('Should have flattened be the same as unflattened.', function() {
 			assert.deepEqual(tree.flatten(), flattened);
+		});
+	});
+
+	describe('Adding tree nodes should by default generator uuid via node-uuid.', function() {
+		var tree = new Tree();
+
+		var flattened = {
+			id: 'some tree',
+			options: {
+				idGenerator: undefined
+			},
+			root: {}
+		}
+
+		tree.unflatten(flattened);
+
+		it('id should be auto-generated for the root node', function() {
+			assert.equal(typeof tree.root.id, 'string');
 		});
 	});
 });
