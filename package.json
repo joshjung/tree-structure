@@ -2,11 +2,8 @@
 	"name": "tree-structure",
 	"author": "Joshua Jung",
 	"description": "Yet another tree implementation in Javascript, specifically for Node.js.",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"main": "index.js",
-	"files": [
-		"index.js"
-	],
 	"url": "https://github.com/joshjung/tree-structure",
 	"email": "joshua.p.jung@gmail.com",
 	"dependencies": {
