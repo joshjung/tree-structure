@@ -119,7 +119,7 @@ TreeNode.prototype = {
 		});
 
 		return {
-			id: this.id,
+			_id: this.id,
 			data: this.data,
 			childIds: ids.length ? ids : undefined
 		};

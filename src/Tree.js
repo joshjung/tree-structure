@@ -79,7 +79,7 @@ Tree.prototype = {
 	decouple: function() {
 		var nodes = [];
 		var tree = {
-			id: this.id,
+			_id: this.id,
 			rootId: this.root.id,
 			nodeIds: [],
 			options: {
@@ -100,14 +100,14 @@ Tree.prototype = {
 	},
 	recouple: function(tree, nodes) {
 		this.clear();
-		this.id = tree.id;
+		this.id = tree._id;
 		this.options = tree.options;
 		this.validateOptions();
 
 		// First we construct all the nodes as orphaned nodes in our
 		// hasharray, making sure to assing ids.
 		for (var i = 0; i < nodes.length; i++) {
-			var node = new TreeNode(this, nodes[i].id);
+			var node = new TreeNode(this, nodes[i]._id);
 			node.data = nodes[i].data;
 			node.childIds = nodes[i].childIds;
 			this.nodes.add(node);

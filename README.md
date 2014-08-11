@@ -11,11 +11,11 @@ Install
 Goals
 =====
 
-In Computer Science, a tree is a data structure constructed of Nodes, where there is a root node and all nodes extend from the root.
+In Computer Science, a tree is a data structure constructed of nodes that contains no cycles and has a single node at its root from which all node paths extend.
 
-The standard automaton that Turing discovered was based on the idea of a tape of characters. As one can imagine, storing a tree on a tape with a start and an end is not ideal.
+The standard automaton that Turing discovered was based on the idea of a sequence of characters. As one can imagine, storing a tree on a tape with a start and an end is not ideal and therefore saving a tree to a database can be troublesome especially if one would like to reuse nodes across multiple trees.
 
-My goal with this module and the accompanying [tree-structure-mongodb](https://github.com/joshjung/tree-structure-mongodb) module is to provide a way to create, manipulate, and store trees in a database in the most efficient possible way.
+My goal with this module and the accompanying [tree-structure-mongodb](https://github.com/joshjung/tree-structure-mongodb) module is to provide a way to create, manipulate, and store trees in a database in the most efficient possible way and to allow reuse of nodes across multiple trees (optionally).
 
 Examples
 ========
@@ -110,7 +110,18 @@ The output of the decoupled tree is JSON that looks like the following:
          { id: 3, data: {...} },
          { id: 100, data: {...}, childIds: [ 1, 2, 3 ] } ] }
 
-The tree Object has a reference to all of the ids of its nodes. Each node in the array has a reference to all of its child ids, but without having a direct pointer to them. **This is why I chose to call it decoupling.** This makes it easy to retrieve save and retrieve the entire tree from the database in two queries.
+The `tree` Object in the above JSON has a reference to all of the ids of its child nodes without actually having a direct reference to them.
+
+Each node in the `nodes` array in the JSON above has a reference to all of its child ids, but without having a direct reference to them.
+
+As a result, one can - in two MongoDG queries - save the `tree` object and then the `nodes` object. This ensures that each node is its own document and that each tree is its own document in a separate collection.
+
+**This is why I chose to call the function `decouple`.** Decoupling all the nodes in the tree from eachother - other than just an `id` reference - makes it easy to ave and retrieve the entire tree from the database in two queries.
+
+UNDER CONSTRUCTION
+==================
+
+This project is still being developed as of August 11, 2014. Please let me know of any bugs on my github page and I will hopefully get to them within a day.
 
 License
 =======
