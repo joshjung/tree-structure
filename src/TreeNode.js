@@ -1,6 +1,6 @@
 var HashArray = require('hasharray');
 
-var TreeNode = function(parent, id, children) {
+var TreeNode = function(parent, id, children, data) {
 	var that = this;
 
 	this.__defineSetter__('_children', function(value) {
@@ -32,6 +32,7 @@ var TreeNode = function(parent, id, children) {
 
 	this.parent = parent;
 	this.clear();
+	this.data = data;
 	this.id = id ? id : this.parentTree.options.idGenerator(this);
 
 	if (children)
@@ -90,7 +91,7 @@ TreeNode.prototype = {
 		}
 
 		if (this.data) {
-			ret.data = data;
+			ret.data = this.data;
 		}
 
 		return ret;
@@ -111,7 +112,7 @@ TreeNode.prototype = {
 			this.data = data.data;
 		}
 	},
-	detach: function() {
+	decouple: function() {
 		var ids = [];
 		this.eachChild(function(child) {
 			ids.push(child.id);
@@ -122,6 +123,19 @@ TreeNode.prototype = {
 			data: this.data,
 			childIds: ids.length ? ids : undefined
 		};
+	},
+	recouple: function() {
+		if (this.childIds) {
+			for (var i in this.childIds) {
+				var id = this.childIds[i];
+				var node = this.parentTree.nodes.get(id);
+				if (!node) {
+					throw Error('node not defined for ' + id);
+				}
+				this._children.add(node);
+				node.recouple();
+			}
+		}
 	}
 };
 

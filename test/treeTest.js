@@ -179,27 +179,64 @@ describe('TreeStructure', function() {
 
 		tree.unflatten(flattened);
 
-		var rootDetached = tree.root.detach();
-		var childDetached = tree.nodes.get(1).detach();
+		var rootDecoupled = tree.root.decouple();
+		var childDecoupled = tree.nodes.get(1).decouple();
 
-		it('Detached node should have an id.', function() {
-			assert.equal(rootDetached.id, tree.root.id);
+		it('Decoupled node should have an id.', function() {
+			assert.equal(rootDecoupled.id, tree.root.id);
 		});
 
-		it('Detached node should have data.', function() {
-			assert.strictEqual(rootDetached.data, tree.root.data);
+		it('Decoupled node should have data.', function() {
+			assert.strictEqual(rootDecoupled.data, tree.root.data);
 		});
 
-		it('Detached node should childIds.', function() {
-			assert.deepEqual(rootDetached.childIds, [1]);
+		it('Decoupled node should childIds.', function() {
+			assert.deepEqual(rootDecoupled.childIds, [1]);
 		});
 
-		it('Detached node without children should not have childIds.', function() {
-			assert.deepEqual(childDetached.childIds, undefined);
+		it('Decoupled node without children should not have childIds.', function() {
+			assert.deepEqual(childDecoupled.childIds, undefined);
 		});
 	});
 
-	describe('Detaching a tree should return a reference to a tree and all nodes completely detached.', function() {
+
+
+	describe('Decoupling a tree should produce predictable JSON.', function() {
+		var tree = new Tree();
+		var flattened = {
+			id: 'some tree',
+			options: {
+				idGenerator: undefined
+			},
+			root: {
+				id: 100,
+				data: {
+					text: "Some data string 100."
+				},
+				children: [{
+					id: 1,
+					data: {
+						text: "Some data string 1."
+					}
+				}, {
+					id: 2,
+					data: {
+						text: "Some data string 2."
+					}
+				}, {
+					id: 3,
+					data: {
+						text: "Some data string 3."
+					}
+				}]
+			}
+		};
+
+		tree.unflatten(flattened);
+		console.log(tree.decouple());
+	});
+
+	describe('Decoupling a tree should return a reference to a tree and all nodes completely detached.', function() {
 		var tree = new Tree();
 
 		var flattened = {
@@ -208,6 +245,7 @@ describe('TreeStructure', function() {
 				idGenerator: undefined
 			},
 			root: {
+				id: 100,
 				data: {
 					text: "Some data string."
 				},
@@ -232,22 +270,36 @@ describe('TreeStructure', function() {
 
 		tree.unflatten(flattened);
 
-		var treeDetached = tree.detach();
+		var beforeJSON = JSON.stringify(tree.flatten());
 
-		it('Detached tree should have an id.', function() {
-			assert.equal(treeDetached.tree.id, tree.id);
+		var treeDecoupled = tree.decouple();
+
+		it('Decoupled tree should have an id.', function() {
+			assert.equal(treeDecoupled.tree.id, tree.id);
 		});
 
-		it('Detached tree should have no root.', function() {
-			assert.strictEqual(treeDetached.tree.root, undefined);
+		it('Decoupled tree should have no root.', function() {
+			assert.strictEqual(treeDecoupled.tree.root, undefined);
 		});
 
-		it('Detached tree should have no children.', function() {
-			assert.strictEqual(treeDetached.tree.nodes, undefined);
+		it('Decoupled tree should have root node id.', function() {
+			assert.strictEqual(treeDecoupled.tree.rootId, 100);
 		});
 
-		it('Detached node should nodes.', function() {
-			assert.deepEqual(treeDetached.nodes.length, 4);
+		it('Decoupled tree should have no children.', function() {
+			assert.strictEqual(treeDecoupled.tree.nodes, undefined);
+		});
+
+		it('Decoupled node should nodes.', function() {
+			assert.deepEqual(treeDecoupled.nodes.length, 4);
+		});
+
+		tree.recouple(treeDecoupled.tree, treeDecoupled.nodes);
+
+		var afterJSON = JSON.stringify(tree.flatten());
+
+		it('Decoupled and recoupled should be the same.', function() {
+			assert.equal(beforeJSON, afterJSON);
 		});
 	});
 });

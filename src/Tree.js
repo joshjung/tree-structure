@@ -29,10 +29,13 @@ var Tree = function(id, options, nodes, callback) {
 		}
 	}
 
+	this.clear = function() {
+		this.nodes = new HashArray(['id']);
+	}
+
+	this.clear();
 	this.options = options;
 	this.validateOptions();
-
-	this.nodes = new HashArray(['id']);
 
 	this.__defineGetter__('root', function() {
 		return this._root;
@@ -73,20 +76,47 @@ Tree.prototype = {
 		this.root = new TreeNode(this);
 		this.root.unflatten(data.root, this);
 	},
-	detach: function() {
+	decouple: function() {
 		var nodes = [];
 		var tree = {
-			'id': this.id
+			id: this.id,
+			rootId: this.root.id,
+			nodeIds: [],
+			options: {
+				childrenField: this.options.childrenField,
+				nodeKeyFields: this.options.nodeKeyFields
+			}
 		};
 
 		this.root.each(function(node, ix) {
-			nodes.push(node.detach());
+			nodes.push(node.decouple());
+			tree.nodeIds.push(node.id);
 		});
 
 		return {
 			tree: tree,
 			nodes: nodes
 		};
+	},
+	recouple: function(tree, nodes) {
+		this.clear();
+		this.id = tree.id;
+		this.options = tree.options;
+		this.validateOptions();
+
+		// First we construct all the nodes as orphaned nodes in our
+		// hasharray, making sure to assing ids.
+		for (var i = 0; i < nodes.length; i++) {
+			var node = new TreeNode(this, nodes[i].id);
+			node.data = nodes[i].data;
+			node.childIds = nodes[i].childIds;
+			this.nodes.add(node);
+		}
+
+		this._root = this.nodes.get(tree.rootId);
+
+		// Now we recouple starting with the root node.
+		this.root.recouple(tree, nodes);
 	},
 	nodesAddedHandler: function(node, nodes) {
 		this.nodes.add.apply(this.nodes, nodes);
@@ -96,6 +126,16 @@ Tree.prototype = {
 	},
 	clone: function() {
 		//TODO
+	},
+	randomize: function(nodeCount) {
+		/*var tree = {
+			id: 'random',
+			root: {}
+		};
+
+		for (var i = 0; i < nodeCount; i++) {
+
+		}*/
 	}
 };
 
