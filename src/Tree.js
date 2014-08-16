@@ -99,6 +99,12 @@ Tree.prototype = {
 		};
 	},
 	recouple: function(tree, nodes) {
+		if (!tree)
+			throw Error('tree must be defined!');
+
+		if (!nodes)
+			throw Error('nodes must be defined!');
+
 		this.clear();
 		this.id = tree._id;
 		this.options = tree.options;
